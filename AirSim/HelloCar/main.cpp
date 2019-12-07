@@ -18,27 +18,27 @@ STRICT_MODE_ON
 
 using namespace msr::airlib;
 
-bool EndOfRace(const Vector3r &pose)
+
+float EuclideanDistance(const Vector3r &pose1, const Vector3r &pose2)
 {
-	if ((pose[0] > -10.0f) && (pose[0] < 10.0f) &&
-        (pose[1] > -1.0f) && (pose[1] < -0.1f))
-			return true;
-	return false;
-		
+    float pose2x = pose2[0];
+    float pose2y = pose2[1];
+    float pose1x = pose1[0];
+    float pose1y = pose1[1];
+    
+    return sqrt(pow(pose2x - pose1x, 2.0f) + pow(pose2y - pose1y, 2.0f));
 }
 
-bool EuclideanDistance(const Vector3r &pose1, const Vector3r &pose2, float offset)
+bool EndOfRace(const Vector3r &pose, const Vector3r &start, bool &running)
 {
-	float pose2x = pose2[0];
-	float pose2y = pose2[1];
-	float pose1x = pose1[0];
-	float pose1y = pose1[1];
-	
-    float dist = sqrt(pow(pose2x - pose1x, 2.0f) + pow(pose2y - pose1y, 2.0f));
-	
-    if (dist > offset)
-		return true;
-    return false;
+	/*if (EuclideanDistance(pose, start) < 2.0f)
+    {
+        if (running)
+			return true;
+        else
+            running = true;
+    }*/
+	return false;
 }
 
 void GetCurrentState(msr::airlib::CarRpcLibClient &simulator, Vector3r &current_pose, float &current_velocity) {
@@ -73,8 +73,9 @@ int main()
     
     LongitudinalControl longitudinal_control(0.2f, 0.0f, 0.08f);
 
+    bool running(false);
     float current_speed(0.0f);
-    Vector3r current_pose, last_pose;
+    Vector3r current_pose, last_pose, start_pose;
 
     msr::airlib::CarRpcLibClient simulator("192.168.0.162");
 	try {
@@ -100,14 +101,18 @@ int main()
                 auto controls = GetCarControls(steering, throttle);
                 
                 simulator.setCarControls(controls);
+                
+                simulator.simPause(false);
+                std::this_thread::sleep_for(std::chrono::duration<double>(0.01f));
+                simulator.simPause(true);
             }
             
-			if (EuclideanDistance(current_pose, last_pose, 0.0))
+			if (EuclideanDistance(current_pose, last_pose) > 0.0f)
 				trajectory.AddWaypoints(current_pose[0], current_pose[1], current_speed);
 			
             last_pose = current_pose;
 
-		} while (!EndOfRace(current_pose));
+		} while (!EndOfRace(current_pose, start_pose, running));
         
 		trajectory.SaveWaypoints("manual.csv");
 	}

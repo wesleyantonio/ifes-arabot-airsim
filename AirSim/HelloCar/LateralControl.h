@@ -30,7 +30,7 @@ public:
         distance = abs( ((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1) / denominator );
         return distance;
     }
-    
+    /*
     float Update(Waypoints &checkpoints, const Vector3r &pose, float velocity){
         auto nearest_waypoint_index = checkpoints.GetCurrentWaypointIndex();
         std::cout << nearest_waypoint_index << std::endl;
@@ -53,23 +53,27 @@ public:
         
         return steering;
     }
-    /*
+    */
+    ///*
     float Update(Waypoints &checkpoints, const Vector3r &pose, float velocity){
         float steering(0.0f);
+        float baseline(2.5f);
+        float lookahead(1.0f);
         if (velocity > 0.001f)
         {
-            auto i = checkpoints.GetCurrentWaypointIndex();
+            auto nearest_waypoint_index = checkpoints.GetCurrentWaypointIndex();
             auto waypoints = checkpoints.TransformWaypointsWithRespectToCar(pose[2]);
+            auto x = waypoints.col(0).segment(nearest_waypoint_index,2).eval();
+            auto y = waypoints.col(1).segment(nearest_waypoint_index,2).eval();
+            auto coeffs = polyfit(x, y, 1);
+            float cte = polyval(coeffs, lookahead);
             
-            auto coeffs = polyfit(waypoints.col(0).segment(i,2), waypoints.col(1).segment(i,2), 1);
-            float cte = polyval(coeffs, 0.0f);
-            
-            steering = control(cte);
+            steering = atan(2.0f * baseline * cte / (lookahead * lookahead));
         }
         steering = std::max(-0.5f, std::min(steering, 0.5f));
         return steering;
     }
-    */
+    //*/
     ~LateralControl(){};
 };
 

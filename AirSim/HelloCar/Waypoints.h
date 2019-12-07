@@ -26,7 +26,7 @@ public:
         waypoints.row(row) = point;
 	}
 
-	void SaveWaypoints(std::string filename){
+	void SaveWaypoints(std::string filename) const {
 		std::ofstream file(filename);
         for(int i=0; i<waypoints.rows(); i++)
 			file << waypoints(i,0) << ";" << waypoints(i,1) << ";" << waypoints(i,2) << std::endl;
@@ -51,29 +51,38 @@ public:
 			}
 		}
 		file.close();
+        //std::ofstream file0("file0.txt"); file0 << waypoints; file0.close();
 	}
     
-    Eigen::MatrixXf TransformWaypointsWithRespectToCar(const Vector3r &pose) {
+    Eigen::MatrixXf TransformWaypointsWithRespectToCar(const Vector3r &pose) const {
         float theta = pose[2];
         Eigen::Matrix2f transform;
-        transform << cos(theta), -sin(theta), sin(theta), cos(theta);
+        transform(0,0) = cos(-theta);
+        transform(0,1) = -sin(-theta);
+        transform(1,0) = sin(-theta);
+        transform(1,1) = cos(-theta);
         
-        auto xy = waypoints.leftCols(2);
-        xy = xy.rowwise() - pose.transpose().leftCols(2);
-        xy = (transform * xy.transpose()).transpose();
+        auto xy = waypoints.leftCols(2).eval();
+        std::ofstream file1("file1.txt"); file1 << xy; file1.close();
+        xy.noalias() = xy.rowwise() - pose.transpose().leftCols(2);
+        std::ofstream file2("file2.txt"); file2 << xy; file2.close();
+        //xy.noalias() = (transform * xy.transpose()).transpose();
         return xy;
     }
     
-    Eigen::MatrixXf TransformWaypointsWithRespectToCar(float theta) {
+    Eigen::MatrixXf TransformWaypointsWithRespectToCar(float theta) const {
         Eigen::Matrix2f transform;
-        transform << cos(theta), -sin(theta), sin(theta), cos(theta);
+        transform(0,0) = cos(-theta);
+        transform(0,1) = -sin(-theta);
+        transform(1,0) = sin(-theta);
+        transform(1,1) = cos(-theta);
         
-        auto xy = waypoints.leftCols(2);
-        xy = (transform * xy.transpose()).transpose();
+        auto xy = waypoints.leftCols(2).eval();
+        xy.noalias() = (transform * xy.transpose()).transpose();
         return xy;
     }
     
-    Eigen::Vector3f GetWaypoint(size_t index){
+    Eigen::Vector3f GetWaypoint(size_t index) const {
         if (index < waypoints.rows())
             return waypoints.row(index);
         else
@@ -83,7 +92,7 @@ public:
     float GetWaypointVelocity(const Vector3r &pose) {
         auto pts = TransformWaypointsWithRespectToCar(pose);
         
-        auto min_dist = pts.rowwise().squaredNorm().minCoeff(&current);
+        auto min_dist = pts.rowwise().norm().minCoeff(&current);
         
         return waypoints(current, 2);
     }
