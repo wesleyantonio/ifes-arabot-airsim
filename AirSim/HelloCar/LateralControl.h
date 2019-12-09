@@ -4,14 +4,18 @@
 #include "Interp.h"
 #include "common/PidController.hpp"
 
-class LateralControl: msr::airlib::PidController
+class LateralControl//: msr::airlib::PidController
 {
+private:
+	float baseline;
+	float steermax;
+	float lookahead;
 public:
 
-    LateralControl(float p, float i, float d) {
-        setPoint(0.0f, p, i, d);
+    LateralControl(float bl, float sm, float la) : baseline(bl), steermax(sm), lookahead(la) {
+        //setPoint(0.0f, p, i, d);
     }
-    
+    /*
     float DistanceOfPointToLine(const Vector3r &pose, const Vector3r &line_point_0, const Vector3r &line_point_1){
         // Get distance of the car position to the trajectory, calculating steering error
         float distance(0.0);
@@ -30,7 +34,7 @@ public:
         distance = abs( ((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1) / denominator );
         return distance;
     }
-    /*
+
     float Update(Waypoints &checkpoints, const Vector3r &pose, float velocity){
         auto nearest_waypoint_index = checkpoints.GetCurrentWaypointIndex();
         std::cout << nearest_waypoint_index << std::endl;
@@ -57,12 +61,10 @@ public:
     ///*
     float Update(Waypoints &checkpoints, const Vector3r &pose, float velocity){
         float steering(0.0f);
-        float baseline(2.5f);
-        float lookahead(1.0f);
         if (velocity > 0.001f)
         {
             auto nearest_waypoint_index = checkpoints.GetCurrentWaypointIndex();
-            auto waypoints = checkpoints.TransformWaypointsWithRespectToCar(pose[2]);
+            auto waypoints = checkpoints.TransformWaypointsWithRespectToCar(pose);
             auto x = waypoints.col(0).segment(nearest_waypoint_index,2).eval();
             auto y = waypoints.col(1).segment(nearest_waypoint_index,2).eval();
             auto coeffs = polyfit(x, y, 1);
@@ -70,7 +72,7 @@ public:
             
             steering = atan(2.0f * baseline * cte / (lookahead * lookahead));
         }
-        steering = std::max(-0.5f, std::min(steering, 0.5f));
+        steering = std::max(-steermax, std::min(steering, steermax));
         return steering;
     }
     //*/

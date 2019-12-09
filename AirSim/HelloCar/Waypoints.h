@@ -51,22 +51,19 @@ public:
 			}
 		}
 		file.close();
-        //std::ofstream file0("file0.txt"); file0 << waypoints; file0.close();
 	}
     
     Eigen::MatrixXf TransformWaypointsWithRespectToCar(const Vector3r &pose) const {
-        float theta = pose[2];
+        float theta = -pose[2];
         Eigen::Matrix2f transform;
-        transform(0,0) = cos(-theta);
-        transform(0,1) = -sin(-theta);
-        transform(1,0) = sin(-theta);
-        transform(1,1) = cos(-theta);
+        transform(0,0) = cos(theta);
+        transform(0,1) = -sin(theta);
+        transform(1,0) = sin(theta);
+        transform(1,1) = cos(theta);
         
         auto xy = waypoints.leftCols(2).eval();
-        std::ofstream file1("file1.txt"); file1 << xy; file1.close();
         xy.noalias() = xy.rowwise() - pose.transpose().leftCols(2);
-        std::ofstream file2("file2.txt"); file2 << xy; file2.close();
-        //xy.noalias() = (transform * xy.transpose()).transpose();
+        xy.noalias() = (transform * xy.transpose()).transpose();
         return xy;
     }
     
@@ -82,8 +79,8 @@ public:
         return xy;
     }
     
-    Eigen::Vector3f GetWaypoint(size_t index) const {
-        if (index < waypoints.rows())
+    Eigen::Vector3f GetWaypoint(int index) const {
+        if (index > 0  && index < waypoints.rows())
             return waypoints.row(index);
         else
             throw std::out_of_range("waypoint index out of range");
@@ -91,6 +88,7 @@ public:
     
     float GetWaypointVelocity(const Vector3r &pose) {
         auto pts = TransformWaypointsWithRespectToCar(pose);
+        //std::ofstream file2("file2.txt"); file2 << xy; file2.close();
         
         auto min_dist = pts.rowwise().norm().minCoeff(&current);
         

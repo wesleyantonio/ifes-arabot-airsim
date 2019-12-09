@@ -46,7 +46,10 @@ void GetCurrentState(msr::airlib::CarRpcLibClient &simulator, Vector3r &current_
     auto car_speed = car_state.speed;
     auto car_pose = car_state.kinematics_estimated.pose;
     
-    current_pose = {car_pose.position[0],car_pose.position[1], VectorMath::yawFromQuaternion(car_pose.orientation)};
+    current_pose = {
+    		car_pose.position[0],
+    		car_pose.position[1],
+			VectorMath::yawFromQuaternion(car_pose.orientation)};
     current_velocity = car_speed;
 }
 
@@ -69,15 +72,15 @@ int main()
 
     Waypoints checkpoints, trajectory;
 	    
-    LateralControl lateral_control(0.1f, 0.0f, 0.18f);
+    LateralControl lateral_control(4.5f, 0.5f, 1.0f);
     
-    LongitudinalControl longitudinal_control(0.2f, 0.0f, 0.08f);
+    LongitudinalControl longitudinal_control(0.2f, 0.0f, 0.01f);
 
     bool running(false);
     float current_speed(0.0f);
     Vector3r current_pose, last_pose, start_pose;
 
-    msr::airlib::CarRpcLibClient simulator("192.168.0.162");
+    msr::airlib::CarRpcLibClient simulator;
 	try {
 		simulator.confirmConnection();
 		simulator.reset();
