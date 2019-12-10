@@ -72,9 +72,9 @@ int main()
 
     Waypoints checkpoints, trajectory;
 	    
-    LateralControl lateral_control(4.5f, 0.5f, 1.0f);
+    LateralControl lateral_control(2.3f, 1.0f, 1.0f);
     
-    LongitudinalControl longitudinal_control(0.2f, 0.0f, 0.01f);
+    LongitudinalControl longitudinal_control(1.0f, 1.0f, 0.01f);
 
     bool running(false);
     float current_speed(0.0f);

@@ -4,16 +4,17 @@
 #include "Interp.h"
 #include "common/PidController.hpp"
 
-class LateralControl//: msr::airlib::PidController
+class LateralControl //:msr::airlib::PidController
 {
 private:
+	float gain;
 	float baseline;
 	float steermax;
 	float lookahead;
 public:
 
-    LateralControl(float bl, float sm, float la) : baseline(bl), steermax(sm), lookahead(la) {
-        //setPoint(0.0f, p, i, d);
+    LateralControl(float bl, float sm, float la) : gain(0.1f), baseline(bl), steermax(sm), lookahead(la){
+        //setPoint(0.0f, 0.1f, 0.0f, 0.2f);
     }
     /*
     float DistanceOfPointToLine(const Vector3r &pose, const Vector3r &line_point_0, const Vector3r &line_point_1){
@@ -53,7 +54,7 @@ public:
             cte *= -1.0f;
             
         float steering = control(cte);
-        steering = std::max(-0.5f, std::min(steering, 0.5f));
+        steering = std::max(-steermax, std::min(steering, steermax));
         
         return steering;
     }
@@ -64,13 +65,18 @@ public:
         if (velocity > 0.001f)
         {
             auto nearest_waypoint_index = checkpoints.GetCurrentWaypointIndex();
-            auto waypoints = checkpoints.TransformWaypointsWithRespectToCar(pose);
-            auto x = waypoints.col(0).segment(nearest_waypoint_index,2).eval();
-            auto y = waypoints.col(1).segment(nearest_waypoint_index,2).eval();
-            auto coeffs = polyfit(x, y, 1);
-            float cte = polyval(coeffs, lookahead);
+            //std::cout << nearest_waypoint_index << std::endl;
+            //auto waypoints = checkpoints.TransformWaypointsWithRespectToCar(pose);
+            //auto x = waypoints.col(0).segment(nearest_waypoint_index,2).eval();
+            //auto y = waypoints.col(1).segment(nearest_waypoint_index,2).eval();
+            //auto coeffs = polyfit(x, y, 1);
+            //float cte = polyval(coeffs, lookahead);
+            auto nearest_waypoint = checkpoints.GetWaypoint(nearest_waypoint_index);
+            float alpha = atan2(nearest_waypoint[1] - pose[1], nearest_waypoint[0] - pose[0]) - pose[2];
+            float Lf = gain * velocity + lookahead;
             
-            steering = atan(2.0f * baseline * cte / (lookahead * lookahead));
+            steering = atan2(2.0f * baseline * sin(alpha) / Lf, 1.0f);
+            //std::cout << steering << std::endl;
         }
         steering = std::max(-steermax, std::min(steering, steermax));
         return steering;

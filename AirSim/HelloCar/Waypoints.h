@@ -66,7 +66,7 @@ public:
         xy.noalias() = (transform * xy.transpose()).transpose();
         return xy;
     }
-    
+    /*
     Eigen::MatrixXf TransformWaypointsWithRespectToCar(float theta) const {
         Eigen::Matrix2f transform;
         transform(0,0) = cos(-theta);
@@ -78,10 +78,10 @@ public:
         xy.noalias() = (transform * xy.transpose()).transpose();
         return xy;
     }
-    
+    */
     Eigen::Vector3f GetWaypoint(int index) const {
-        if (index > 0  && index < waypoints.rows())
-            return waypoints.row(index);
+        if (index >= 0  && index < waypoints.rows())
+            return waypoints.row(index).eval();
         else
             throw std::out_of_range("waypoint index out of range");
     }
