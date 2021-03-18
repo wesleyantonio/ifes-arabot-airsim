@@ -24,3 +24,6 @@ As equipes serão formadas por grupos de:
 - Obter a posição e velocidade atuais do carro
 - Encontre o waypoint mais próximo do carro.
 - Interpolar Waypoints: como os waypoints são discretos e afastados uns dos outros (1m, 3m e 5m) e nosso controlador tem um desempenho melhor com um caminho contínuo, enviaremos um subconjunto dos waypoints a uma certa distância do ponto mais próximo do veículo. A interpolação entre cada waypoint fornecerá um caminho de resolução mais fino e o tornará mais "contínuo". Uma interpolação linear simples é usada como método preliminar para resolver esse problema, embora seja melhor abordada com métodos de interpolação melhores (interpolação por spline, por exemplo).
+
+gnuplot
+plot "build/output/bin/Trajetoria.txt" using 2:1 with lines

@@ -16,12 +16,8 @@ include_directories(
   ${RPC_LIB_INCLUDES}
 )
 
-file(GLOB_RECURSE APP_HEADERS
-${AIRSIM_ROOT}/HelloCar/*.h)
-
-#AddExecutableSource()
-add_executable(${PROJECT_NAME} ${AIRSIM_ROOT}/HelloCar/main.cpp ${APP_HEADERS})
-
+AddExecutableSource()
+			
 CommonTargetLink()
 target_link_libraries(${PROJECT_NAME} AirLib)
 target_link_libraries(${PROJECT_NAME} ${RPC_LIB})
