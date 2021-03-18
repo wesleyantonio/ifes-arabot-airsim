@@ -1,4 +1,4 @@
-# ifes-arabot-2019-2
+# ifes-arabot-airsim
 Trabalho de C++: Competição de Carros Autônomos em Simuladores de Jogos
 
 1.1 - Equipes
