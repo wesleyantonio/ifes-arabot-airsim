@@ -113,16 +113,9 @@ int main()
 			{
 				int x = (int)car_pose_current.position[0];
 				int y = (int)car_pose_current.position[1];
-				map->access[150+x][150+y] = 0;
-				/*
-				std::vector<uint8_t> png_image = client.simGetImage("0", ImageCaptureBase::ImageType::Scene);
-				std::vector<ImageCaptureBase::ImageRequest> request = { 
-					ImageCaptureBase::ImageRequest("1", ImageCaptureBase::ImageType::Segmentation, false, false),       
-					
-					ImageCaptureBase::ImageRequest("1", ImageCaptureBase::ImageType::DepthPerspective, true) 
-    			};
-				const std::vector<ImageCaptureBase::ImageResponse>& response = client.simGetImages(request);
-				*/
+				map->access[150+x][150+y] = 0; //Translada as coordenadas para garantir que os indices sejam sempre positivos
+				
+				// TODO : mapear a pista colocando 0 em toda sua extensao em nao somente na trajetoria do carro como foi feito acima
 			}
 
 		} while (!finish(car_pose_current));
